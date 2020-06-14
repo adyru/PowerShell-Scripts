@@ -8,10 +8,14 @@ ForEach ($record in $Records)
     {
     try{$Lookups = Resolve-DnsName $record -ErrorAction Stop}
     catch [System.ComponentModel.Win32Exception] 
-    {
+            {
     Write-host -ForegroundColor red $record " was not found"}
-    }
-forEach ($lookup in $Lookups)
-    {
-    write-host $lookup.name,$lookup.IPAddress,$lookup.Type
+    Finally
+            {
+               forEach ($lookup in $Lookups)
+                {
+                write-host $lookup.name,$lookup.IPAddress,$lookup.Type
+                }
+            }
+        
     }
