@@ -8,10 +8,10 @@ $Error[0].Exception.GetType().FullName
 System.ComponentModel.Win32Exception
 
 #>
-$Records = Get-Content servers.txt
-ForEach ($record in $Records)
+
+Function DNS
     {
-    try
+        try
             {$Lookups = Resolve-DnsName $record -ErrorAction Stop}
    
    catch [System.ComponentModel.Win32Exception] 
@@ -24,5 +24,11 @@ ForEach ($record in $Records)
                 write-host $lookup.name,$lookup.IPAddress,$lookup.Type
                 }
             }
+    }
+
+$Records = Get-Content servers.txt
+ForEach ($record in $Records)
+    {
+    DNS record
         
     }
