@@ -9,10 +9,12 @@ System.ComponentModel.Win32Exception
 
 #>
 
-Function DNS
+$Matches = @()
+
+Function Global:DNS
     {
         try
-            {$Lookups = Resolve-DnsName $record -ErrorAction Stop}
+            {$Script:Lookups = Resolve-DnsName $record -ErrorAction Stop}
    
    catch [System.ComponentModel.Win32Exception] 
             {Write-host -ForegroundColor red $record " was not found"}
@@ -22,13 +24,26 @@ Function DNS
                forEach ($lookup in $Lookups)
                 {
                 write-host $lookup.name,$lookup.IPAddress,$lookup.Type
+                $DNSObject = New-Object System.Object
+                $DNSObject | Add-Member -type NoteProperty -name Name -Value $lookup.name
+                $DNSObject | Add-Member -type NoteProperty -name IP -Value $lookup.IPAddress
+                $DNSObject | Add-Member -type NoteProperty -name Type -Value $lookup.Type
+                #add object to array
+                #Matches$Global:Matches +=  $DNSObject
+                $Script:Matches = $Matches +  $DNSObject
                 }
             }
     }
+ 
+
+$date = get-date -Format dd-MM-yyyy-HH-mm-ss
+$CSVOut =  $PSScriptRoot + "\" + $Date + "-DNS.csv"
+
 
 $Records = Get-Content servers.txt
 ForEach ($record in $Records)
     {
     DNS record
-        
     }
+$Matches | Export-Csv -NoClobber -NoTypeInformation -path $CSVOut
+$Matches = $null
