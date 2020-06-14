@@ -11,7 +11,7 @@ System.ComponentModel.Win32Exception
 
 $Matches = @()
 
-Function Global:DNS
+Function Script:DNS
     {
         try
             {$Script:Lookups = Resolve-DnsName $record -ErrorAction Stop}
@@ -29,8 +29,8 @@ Function Global:DNS
                 $DNSObject | Add-Member -type NoteProperty -name IP -Value $lookup.IPAddress
                 $DNSObject | Add-Member -type NoteProperty -name Type -Value $lookup.Type
                 #add object to array
-                #Matches$Global:Matches +=  $DNSObject
-                $Script:Matches = $Matches +  $DNSObject
+                $Script:Matches +=  $DNSObject
+                #$Script:Matches = $Matches +  $DNSObject
                 }
             }
     }
