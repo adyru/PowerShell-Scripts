@@ -13,6 +13,7 @@ $Matches = @()
 
 Function Script:DNS
     {
+    $Script:Lookups = $null
         try
             {$Script:Lookups = Resolve-DnsName $record -ErrorAction Stop}
    
