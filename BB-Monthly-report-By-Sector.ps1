@@ -157,10 +157,6 @@ Function Script:BBUser
         
     }
 
-Function $Script:Get-BBGroups
-    {
-
-    }
 
 $COBB = @()
 $MTBB = @()
