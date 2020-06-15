@@ -1,4 +1,10 @@
+<#
+Imports a export csv from the BES console
+Looks up user in AD and seperate users by sector
+Looks up mdm app groups user is in
+exports these into seperate csvs
 
+#>
 
 Function Script:BBUser
     {
