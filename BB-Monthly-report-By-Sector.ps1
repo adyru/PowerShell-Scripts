@@ -1,4 +1,4 @@
-<#
+﻿<#
 Imports a export csv from the BES console
 Looks up user in AD and seperate users by sector
 Looks up mdm app groups user is in
@@ -8,7 +8,7 @@ exports these into seperate csvs
 
 Function Script:BBUser
     {
-    #voiud previous vvalues
+    #void previous vvalues
     $BBUSer = $null
     $BBAppGroups = $null
     $BBAppGroup = $null
@@ -18,17 +18,24 @@ Function Script:BBUser
     #Garbage collection to stop memory going offpiste
     [GC]::Collect()
     [GC]::WaitForPendingFinalizers();
-
+    # Lookup user in AD
     $BBUSer = get-aduser $user.Username -properties Sector,BU,GivenName,Surname,Title,Office
+    # Use ARS PS module to get MDM APP groups
     $BBAppGroups = Get-QADMemberOf $user.Username | ? {$_.name -like "*app*"}
+    #Join it on one line 
     $BBAppGroup =  $BBAppGroups.name -join ","
+    # Use ARS PS module to get MDM groups
     $BBGroups = Get-QADMemberOf $user.Username | ? {$_.name -like "*bes*"}
+    #Join it on one line 
     $BBGroup =  $BBGroups.name -join ","
+    # Using switch statement to divide users by Sector
             switch($BBUSer) 
                 {
                 # USer in Sector1
+                #First Sector
                 {$BBUSer.Sector -eq "Sector1"}
 	                {
+                    #Output to screen and also create the properties to add to array
                     write-host -foregroundcolor Red "MB is in Sector1"
                     $BBObject = New-Object System.Object
                     $BBObject | Add-Member -type NoteProperty -name 4x4 -Value $user.Username
@@ -157,7 +164,7 @@ Function Script:BBUser
         
     }
 
-
+# Create Arrays
 $COBB = @()
 $MTBB = @()
 $AVBB = @()
@@ -170,6 +177,7 @@ $users = Import-Csv export.csv | select -First 100
 
 
 # Format the date so that we can create different output files
+# then  create variable for seperate output
 $date = get-date -Format dd-MM-yyyy--hh-mm
 $COBBCSVOut =  $date + "COBB-Blue-BB-Users.csv"
 $MTBBCSVOut =  $date + "MTBB-Blue-BB-Users.csv"
@@ -177,11 +185,13 @@ $AVBBCSVOut =  $date + "AVBB-Blue-BB-Users.csv"
 $LABBCSVOut =  $date + "LABB-Blue-BB-Users.csv"
 $CNBBCSVOut =  $date + "CNBB-Blue-BB-Users.csv"
 $UNBBCSVOut =  $date + "UNBB-Blue-BB-Users.csv"
+
+#Loop through users to get info
 ForEach ($user in $users)
     {
     BBUSer $user.Username
     }
-
+#Output the data to csv files
 $MTBB | Export-Csv -NoClobber -NoTypeInformation -path $MTBBCSVOut
 $COBB| Export-Csv -NoClobber -NoTypeInformation -path $COBBCSVOut
 $AVBB | Export-Csv -NoClobber -NoTypeInformation -path $AVBBCSVOut
