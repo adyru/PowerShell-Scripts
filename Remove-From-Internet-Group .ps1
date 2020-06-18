@@ -16,7 +16,7 @@ $date = get-date -Format dd-MM-yyyy--hh-mm
 
 
 #Inpu file
-$Input = "\\NAS1.your.domain.dc\SuccessFactor-InternetGroup-Import\Remove-Users.txt"
+$Input = "\\NAS1.your.domain.dc\share\Remove-Users.txt"
 
 #$Vars for mail send at the end
 $SD = "auser@somewhere.com"
