@@ -1,6 +1,6 @@
 <#
 search content of files
-and export to file
+and export matches to file
 along with file for errors
 #>
 
