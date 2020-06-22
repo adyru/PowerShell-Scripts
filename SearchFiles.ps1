@@ -1,6 +1,7 @@
-﻿<#
-get all files on a computer
-and then se
+<#
+search content of files
+and export to file
+along with file for errors
 #>
 
 #Variables to change as required
