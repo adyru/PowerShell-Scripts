@@ -70,11 +70,11 @@ ForEach ($user in $users)
             {
             #write-host "i am here"
             # It does - we arent interested but we will output to file anyway
-            $myObject = New-Object System.Object
-            $myObject | Add-Member -type NoteProperty -name 4x4 -Value $user.SamAccountName
-            $myObject | Add-Member -type NoteProperty -name UserPrincipalName -Value $user.UserPrincipalName
-            $myObject | Add-Member -type NoteProperty -name PrimarySMTPAddress -Value $user.PrimarySMTPAddress
-            $myObject | Add-Member -type NoteProperty -name ParentContainer -Value $user.ParentContainer
+            $myObject1 = New-Object System.Object
+            $myObject1 | Add-Member -type NoteProperty -name 4x4 -Value $user.SamAccountName
+            $myObject1 | Add-Member -type NoteProperty -name UserPrincipalName -Value $user.UserPrincipalName
+            $myObject1 | Add-Member -type NoteProperty -name PrimarySMTPAddress -Value $user.PrimarySMTPAddress
+            $myObject1 | Add-Member -type NoteProperty -name ParentContainer -Value $user.ParentContainer
             $Matches += $myObject 
             }
     Else
@@ -102,12 +102,12 @@ ForEach ($user in $users)
                         #Store it in an array for later outputting
                         #write-host "here"
                         Write-host "UPN exists" $UPNExistCheck
-                        $myObject1 = New-Object System.Object
-                        $myObject1 | Add-Member -type NoteProperty -name 4x4 -Value $UPNExist.SamAccountName
-                        $myObject1 | Add-Member -type NoteProperty -name UserPrincipalName -Value $UPNExist.UserPrincipalName
-                        $myObject1 | Add-Member -type NoteProperty -name PrimarySMTPAddress -Value $UPNExist.PrimarySMTPAddress
-                        $myObject1 | Add-Member -type NoteProperty -name ParentContainer -Value $UPNExist.ParentContainer
-                        $ExistingUPNs += $myObject1
+                        $myObject2 = New-Object System.Object
+                        $myObject2|  Add-Member -type NoteProperty -name 4x4 -Value $UPNExist.SamAccountName
+                        $myObject2 | Add-Member -type NoteProperty -name UserPrincipalName -Value $UPNExist.UserPrincipalName
+                        $myObject2 | Add-Member -type NoteProperty -name PrimarySMTPAddress -Value $UPNExist.PrimarySMTPAddress
+                        $myObject2 | Add-Member -type NoteProperty -name ParentContainer -Value $UPNExist.ParentContainer
+                        $ExistingUPNs += $myObject2
                         }
                     Else
                         {
@@ -115,25 +115,25 @@ ForEach ($user in $users)
                             # and the upn doesnt match the primary email address
                             # So we will change the UPN and store details for output
                         #Set-QADuser $user.samaccountname -UserPrincipalName $user.PrimarySMTPAddress -confirm -whatif
-                        $myObject2 = New-Object System.Object
-                        $myObject2 | Add-Member -type NoteProperty -name 4x4 -Value $user.SamAccountName
-                        $myObject2 | Add-Member -type NoteProperty -name OldUserPrincipalName -Value $user.UserPrincipalName
-                        $myObject2 | Add-Member -type NoteProperty -name NewUserPrincipalName -Value $user.PrimarySMTPAddress
-                        $myObject2 | Add-Member -type NoteProperty -name PrimarySMTPAddress -Value $user.PrimarySMTPAddress
-                        $myObject2 | Add-Member -type NoteProperty -name ParentContainer -Value $user.ParentContainer
-                        $Changes += $myObject2
+                        $myObject3 = New-Object System.Object
+                        $myObject3 | Add-Member -type NoteProperty -name 4x4 -Value $user.SamAccountName
+                        $myObject3 | Add-Member -type NoteProperty -name OldUserPrincipalName -Value $user.UserPrincipalName
+                        $myObject3 | Add-Member -type NoteProperty -name NewUserPrincipalName -Value $user.PrimarySMTPAddress
+                        $myObject3 | Add-Member -type NoteProperty -name PrimarySMTPAddress -Value $user.PrimarySMTPAddress
+                        $myObject3 | Add-Member -type NoteProperty -name ParentContainer -Value $user.ParentContainer
+                        $Changes += $myObject3
                         }
                 }
             Else
                 {
                 # We will save users where the domain part of the email address 
                     #is not a valid UPN Suffic
-                $myObject3 = New-Object System.Object
-                $myObject3 | Add-Member -type NoteProperty -name 4x4 -Value $user.SamAccountName
-                $myObject3 | Add-Member -type NoteProperty -name UserPrincipalName -Value $user.UserPrincipalName
-                $myObject3 | Add-Member -type NoteProperty -name PrimarySMTPAddress -Value $user.PrimarySMTPAddress
-                $myObject3 | Add-Member -type NoteProperty -name ParentContainer -Value $user.ParentContainer
-                $InvalidUPNs += $myObject3
+                $myObject4 = New-Object System.Object
+                $myObject4 | Add-Member -type NoteProperty -name 4x4 -Value $user.SamAccountName
+                $myObject4 | Add-Member -type NoteProperty -name UserPrincipalName -Value $user.UserPrincipalName
+                $myObject4 | Add-Member -type NoteProperty -name PrimarySMTPAddress -Value $user.PrimarySMTPAddress
+                $myObject4 | Add-Member -type NoteProperty -name ParentContainer -Value $user.ParentContainer
+                $InvalidUPNs += $myObject4
                 }
                     
 
