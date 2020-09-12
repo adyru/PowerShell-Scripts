@@ -75,7 +75,7 @@ ForEach ($user in $users)
             $myObject1 | Add-Member -type NoteProperty -name UserPrincipalName -Value $user.UserPrincipalName
             $myObject1 | Add-Member -type NoteProperty -name PrimarySMTPAddress -Value $user.PrimarySMTPAddress
             $myObject1 | Add-Member -type NoteProperty -name ParentContainer -Value $user.ParentContainer
-            $Matches += $myObject 
+            $Matches += $myObject1
             }
     Else
             {
