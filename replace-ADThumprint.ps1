@@ -78,7 +78,7 @@ If ($PathExist -eq $False)
     }
 
 #Input exists so import the user file
-$users = import-csv $InputFile  ñDelimiter ì;î -encoding unicode # | select -First 1
+$users = import-csv $InputFile  ‚ÄìDelimiter ‚Äú;‚Äù -encoding unicode # | select -First 1
 
 #Import resize
 Import-Module .\Resize-Image.psm1
@@ -115,7 +115,7 @@ ForEach($user in $users)
 
     #write-host "sleeping for 1 secs"
     Start-Sleep -Seconds 1
-    $checkADUser = Get-QADUser $user.dn
+    $checkADUser = Get-ADUser $user.dn
     #User not found so will ignore
      If ([STRING]::IsNullOrWhitespace($checkADUser))
         {
