@@ -72,7 +72,7 @@ Function Write-Log {
 }
 
 Function Export-File {
-            <#
+    <#
         . Notes
         =======================================
         v1  Created on: 13/05/2021
@@ -85,137 +85,122 @@ Function Export-File {
         If files exists adds in some random digits to makes sure there is an export
             export-file $var $varout
         #>
-     [CmdletBinding()]
+    [CmdletBinding()]
         
-        Param(
-        [Parameter(Mandatory=$false)]
+    Param(
+        [Parameter(Mandatory = $false)]
         [Array]
         $OutVar,
 
-        [Parameter(Mandatory=$True)]
+        [Parameter(Mandatory = $True)]
         [string]
         $OutFile
 
-        )
-        Begin
-            {
-            $checkFile = test-path $outfile
-            }
-        Process
-            {
-            If($checkFile -eq $true)
-                {
-                # if the files exists we will use  a random number into the filename 
-                write-host -ForegroundColor Red "$($outfile) already exists"
+    )
+    Begin {
+        $checkFile = test-path $outfile
+    }
+    Process {
+        If ($checkFile -eq $true) {
+            # if the files exists we will use  a random number into the filename 
+            write-host -ForegroundColor Red "$($outfile) already exists"
 
-                If (!($OutVar))
-                    {
-                    write-host "Variable is null"
-                    return;
-                    }
-                Else
-                    {
-                    $Random = Get-Random -Minimum 1 -Maximum 100
-                    $newOut =  $outfile -replace ".csv","$($Random).csv"
-                    $OutVar | Export-Csv -NoClobber -NoTypeInformation -path $newout -Encoding UTF8
-                    $OutcheckFile = test-path $outfile
-                    If($OutcheckFile -eq $true)
-                        {write-host -ForegroundColor Green "Variable exported to $($newout)"}
-                    Else
-                        {write-host -ForegroundColor red "Variable not exported to $($newout)"}
-                    }
+            If (!($OutVar)) {
+                write-host "Variable is null"
                 return;
-                }
-            Else
-                {
-                If (!($OutVar))
-                    {
-                    write-host "Variable is null"
-                    return;
-                    }
+            }
+            Else {
+                $Random = Get-Random -Minimum 1 -Maximum 100
+                $newOut = $outfile -replace ".csv", "$($Random).csv"
+                $OutVar | Export-Csv -NoClobber -NoTypeInformation -path $newout -Encoding UTF8
+                $OutcheckFile = test-path $outfile
+                If ($OutcheckFile -eq $true)
+                { write-host -ForegroundColor Green "Variable exported to $($newout)" }
                 Else
-                    {
-                    $OutVar | Export-Csv -NoClobber -NoTypeInformation -path $OutFile -Encoding UTF8
-                    $OutcheckFile = test-path $outfile
-                    If($OutcheckFile -eq $true)
-                        {write-host -ForegroundColor Green "Variable exported to $($OutFile)"}
-                    Else
-                        {write-host -ForegroundColor red "Variable not exported to $($OutFile)"}
-                    }
-                }
+                { write-host -ForegroundColor red "Variable not exported to $($newout)" }
+            }
+            return;
+        }
+        Else {
+            If (!($OutVar)) {
+                write-host "Variable is null"
+                return;
+            }
+            Else {
+                $OutVar | Export-Csv -NoClobber -NoTypeInformation -path $OutFile -Encoding UTF8
+                $OutcheckFile = test-path $outfile
+                If ($OutcheckFile -eq $true)
+                { write-host -ForegroundColor Green "Variable exported to $($OutFile)" }
+                Else
+                { write-host -ForegroundColor red "Variable not exported to $($OutFile)" }
+            }
+        }
             
  
 
     }
-        End
-           {
+    End {
 
-           }
+    }
 }
 
 
 
-Function Nettest-server{
-        <#
+Function Nettest-server {
+    <#
         .Description
         test-server server port.Params are server and port - accepts either common ports or numbers
         it then trys to resolve the DNS name and catches the error if cant 
         if it succeeds it goes on to test the connection to a port 
         returns values back to script block in $tcpclient -  Timeout for connection is $Timer in MS
         #>
-     [CmdletBinding()]
+    [CmdletBinding()]
 
-        Param(
-        [Parameter(Mandatory=$True)]
+    Param(
+        [Parameter(Mandatory = $True)]
         [string]
         $servertest,
 
-        [Parameter(Mandatory=$True)]
+        [Parameter(Mandatory = $True)]
         [string]
         $Porttest
-        )
-        try
-            {
-            # Check DNS and just keep the first one
-            $lookups= $null
-            $Lookups = (Resolve-DnsName $servertest -DnsOnly -ErrorAction Stop).IP4Address
-            $DNSCheck = $Lookups| select -First 1
-            }
-        #Catch the error in the DNS record doesnt exist
-        catch [System.ComponentModel.Win32Exception] 
-            {
-            Write-host -ForegroundColor red $servertest " was not found"
-            exit
-            }
+    )
+    try {
+        # Check DNS and just keep the first one
+        $lookups = $null
+        $Lookups = (Resolve-DnsName $servertest -DnsOnly -ErrorAction Stop).IP4Address
+        $DNSCheck = $Lookups | Select-Object -First 1
+    }
+    #Catch the error in the DNS record doesnt exist
+    catch [System.ComponentModel.Win32Exception] {
+        Write-host -ForegroundColor red $servertest " was not found"
+        exit
+    }
     
-            # Null out array
-             If ([STRING]::IsNullOrWhitespace($DNSCheck))
-                {
-                }
-            Else
-                {
-                # If it is a numerical port do a check
-                if($porttest -match "^\d{1,3}")
-                    {
-                     try {
-                        $tcpclient  = New-Object System.Net.Sockets.TCPClient
-                        $Timer=1500
-                        $StartConnection = $tcpclient.BeginConnect($servertest,$PortTest,$null,$null)
-                        $wait = $StartConnection.AsyncWaitHandle.WaitOne($timer,$false)
-                        return  Write-Output -NoEnumerate  $tcpclient
-                        }
-
-                    catch {
-                           return  Write-Output -NoEnumerate  $tcpclient
-                          }
-                    }
-                    
-                Else
-                    {
-                    write-host -ForegroundColor Red "You have entered and incorrect port $($porttest) - it needs to either be a number"
-                    }
-                }
+    # Null out array
+    If ([STRING]::IsNullOrWhitespace($DNSCheck)) {
+    }
+    Else {
+        # If it is a numerical port do a check
+        if ($porttest -match "^\d{1,3}") {
+            try {
+                $tcpclient = New-Object System.Net.Sockets.TCPClient
+                $Timer = 1500
+                $StartConnection = $tcpclient.BeginConnect($servertest, $PortTest, $null, $null)
+                $wait = $StartConnection.AsyncWaitHandle.WaitOne($timer, $false)
+                return  Write-Output -NoEnumerate  $tcpclient
             }
+
+            catch {
+                return  Write-Output -NoEnumerate  $tcpclient
+            }
+        }
+                    
+        Else {
+            write-host -ForegroundColor Red "You have entered and incorrect port $($porttest) - it needs to either be a number"
+        }
+    }
+}
 
 
 
@@ -231,15 +216,15 @@ Function Nettest-server{
 $DC = "RPWDOMC01.RPW01.babgroup.co.uk"
 
 #Arrays
-$NotQCSUser= @()
+$NotQCSUser = @()
 $NotQCSMailbox = @()
-$QCSMailboxUser =  @()
-$MailUser =  @()
-$ErrorMEU  =  @()
-$NoRecipient =  @()
-$NotMB =  @()
-$NoinAD =  @()
-$MBNotDelete =  @()
+$QCSMailboxUser = @()
+$MailUser = @()
+$ErrorMEU = @()
+$NoRecipient = @()
+$NotMB = @()
+$NoinAD = @()
+$MBNotDelete = @()
 
 #Get the date for Output
 $date = get-date -Format dd-MM-yyyy--hh-mm
@@ -249,18 +234,18 @@ $date = get-date -Format dd-MM-yyyy--hh-mm
 $FolderDate = Get-Date -Format dd-MM-yyyy--hh-mm
 $newFolder = "$($PSScriptRoot)\output\$($FolderDate)"
 $TestFolder = test-path $newFolder
- If($testfolder -eq $false){New-Item -Path $NewFolder -ItemType directory}
+If ($testfolder -eq $false) { New-Item -Path $NewFolder -ItemType directory }
 $OutputFolder = $NewFolder
 
 #Output Files that will use to check what has gone on
 $NotQCSUserOut = "$OutputFolder\NotQCSUser-$($date).csv"
-$NotQCSMailboxOut  = "$OutputFolder\NotQCSMailbox-$($date).csv"
-$QCSMailboxUserOut  =  "$OutputFolder\QCSMailboxUser-$($date).csv"
-$MailUserOut  =  "$OutputFolder\MailUser-$($date).csv"
-$ErrorMEUOut =  "$OutputFolder\MailEU-Error-$($date).csv"
-$NoRecipientOut  =  "$OutputFolder\Recipient-Error-$($date).csv"
-$NotMBOut   =  "$OutputFolder\Recipient-Not-MB-$($date).csv"
-$NotinADOut  =  "$OutputFolder\Recipient-Not-in-AD-$($date).csv"
+$NotQCSMailboxOut = "$OutputFolder\NotQCSMailbox-$($date).csv"
+$QCSMailboxUserOut = "$OutputFolder\QCSMailboxUser-$($date).csv"
+$MailUserOut = "$OutputFolder\MailUser-$($date).csv"
+$ErrorMEUOut = "$OutputFolder\MailEU-Error-$($date).csv"
+$NoRecipientOut = "$OutputFolder\Recipient-Error-$($date).csv"
+$NotMBOut = "$OutputFolder\Recipient-Not-MB-$($date).csv"
+$NotinADOut = "$OutputFolder\Recipient-Not-in-AD-$($date).csv"
 $MBNotDeleteOut = "$OutputFolder\MB-Not_deleted-$($date).csv"
 $NoRecipientOut = "$OutputFolder\No-recipient-$($date).csv"
 
@@ -274,17 +259,17 @@ $logfile = "$OutputFolder\Convert-MEU-Log-$($date).txt"
 [int]$NotQCSMailboxCounter = 0
 [int]$QCSMailboxUserCounter = 0
 [int]$MailUserCounter = 0
-[int]$ErrorMEUCounter  =  0
-[int]$NoRecipientCounter  = 0
-[int]$NotMBCounter =  0
-[int]$NoinADCounter =  0
+[int]$ErrorMEUCounter = 0
+[int]$NoRecipientCounter = 0
+[int]$NotMBCounter = 0
+[int]$NoinADCounter = 0
 [int]$MBNotDeleteCounter = 0
 
 #Inputfiles
 $UsersFile = "users.txt"
 
 # We are going to do a garbage collection every 2 mins so 
-    # need to kick of a timer
+# need to kick of a timer
 #Start Stopwatch
 $sw = [diagnostics.stopwatch]::StartNew()
 
@@ -303,58 +288,52 @@ Write-Log -Message "Setting Domain Controller to  $($DC )" -logfile $logfile
 Write-Log -Message "Checking connectivity to Domain Controller $($DC )" -logfile $logfile
 
 # Check using the nettest-server function 
-$CheckCOnnection= Nettest-server $DC 135
+$CheckCOnnection = Nettest-server $DC 135
 $CheckCOnnection
 
 #$CheckCOnnection = test-netconnection $DC -port 135
 # Check what the status of the connection is
-If($CheckCOnnection.Connected -eq $false)
-    {
+If ($CheckCOnnection.Connected -eq $false) {
     # It failed - report and exit script
     write-host -ForegroundColor red "Connection is $($CheckCOnnection.Connected) so exiting script, amend DC variable and re run" 
     Write-Log -Message "Connectivity to Domain Controller $($DC ) is $($CheckCOnnection.Connected ) so exiting script " -logfile $logfile -Level "Fatal"
     exit
-    }
-Else
-    {
+}
+Else {
     #All good so carry on and report to screen
     write-host -ForegroundColor Green "Connectivity to Domain Controller $($DC ) Succdded - check connection is  $($CheckCOnnection.Connected ) "
     Write-Log -Message "Connectivity to Domain Controller $($DC ) Succdded - check connection is  $($CheckCOnnection.Connected ) " -logfile $logfile
-    }
+}
 
 
 #Check import file and import users if present
 Write-Log -Message "Checking $($UsersFile ) is available"
 $CheckUserImport = Test-Path $UsersFile
-If($CheckUserImport  -eq $false)
-    {
+If ($CheckUserImport -eq $false) {
     #Input file doesnt exist so exit script
     #write-host "$($UsersFile) doesnt exist so exiting script, amend $UsersFile variable and re run" -ForegroundColor red
     Write-Log -Message "$($UsersFile) doesnt exist so exiting script" -logfile $logfile -Level "Fatal"
     exit
-    }
-Else
-    {
+}
+Else {
     #Input found so carrying on
     Write-Log -Message "$($UsersFile) exists" -logfile $logfile 
-    }
+}
 
 # Import the users file
 $USers = get-content $UsersFile #| select -First 1
 
 #Report on the number of users to process
-$UsersCount = $USers | measure
+$UsersCount = $USers | Measure-Object
 write-host "$($UsersCount.Count) to be processed"
 Write-Log -Message "$($UsersCount) to be processed" -logfile $logfile 
 
 
 #here we start the main loop
-ForEach($user in $users)
-    {
+ForEach ($user in $users) {
     #Do garbage collection every couple of minutes to stop memory going off piste
-        # so check if it is around 2 mins
-    if( $Sw.Elapsed.minutes -eq 2)
-        {
+    # so check if it is around 2 mins
+    if ( $Sw.Elapsed.minutes -eq 2) {
         # it is over 2 mins so start garbage collection
         Write-Log -Message "Doing Garbage Collection after $($Sw.Elapsed.minutes ) minutes"  -logfile $logfile 
         [GC]::Collect()
@@ -363,7 +342,7 @@ ForEach($user in $users)
         $Sw.Stop()
         $sw = [diagnostics.stopwatch]::StartNew()
 
-        }
+    }
 
     #Check where we are and report to screen
     $USerProcessedCounter ++
@@ -371,237 +350,220 @@ ForEach($user in $users)
     # Check recipient type
     $RecipientType = get-recipient $user -erroraction silentlycontinue
     #check recipient exists and report if it cant be found
-    If ([STRING]::IsNullOrWhitespace($RecipientType))
-        {
+    If ([STRING]::IsNullOrWhitespace($RecipientType)) {
         # no match so log this  and move on  to next user
         #write-host -ForegroundColor Red "Cannot find a recipient matching $($user)"
         Write-Log -Message "Cannot find a recipient matching $($user)" -logfile $logfile -Level "Error"
         $NoRecipientObj = New-Object System.Object
         $NoRecipientObj | Add-Member -type NoteProperty -name Recipient -Value $User
-        $NoRecipient  += $NoRecipientObj
+        $NoRecipient += $NoRecipientObj
         $NoRecipientCounter++
-        }
+    }
     # check if recipient is a mailbox
-    Elseif($RecipientType.RecipientType -ne "UserMailbox")
-        {
+    Elseif ($RecipientType.RecipientType -ne "UserMailbox") {
         # recipeint isnt a mailbox so log this and move on  to next user
         #write-host -ForegroundColor Red "Recipient is not a mailbox - recipient type is matching $($RecipientType.RecipientType)"
         Write-Log -Message "Recipient is not a mailbox - recipient type is matching $($RecipientType.RecipientType)" -logfile $logfile -Level "Error"
         $NotMBObj = New-Object System.Object
         $NotMBObj | Add-Member -type NoteProperty -name Recipient -Value $User
         $NotMBObj | Add-Member -type NoteProperty -name Type -Value $RecipientType.RecipientType 
-        $NotMB  += $NotMBObj
+        $NotMB += $NotMBObj
         $NotMBCounter++
-        }
+    }
     Else
-    # Mailbox found so we will process further
-        {
+    { # Mailbox found so we will process further
         Write-Log -Message "$($User) is $($RecipientType.RecipientType)" -logfile $logfile
         Write-Log -Message "Searching for $($User) in AD" -logfile $logfile  
-                $ADUser = Get-ADUser -Filter 'mail -eq $user' -properties * 
-                # We cant find AD object with that email address
-                If ([STRING]::IsNullOrWhitespace($ADUser))
-                    {
-                    #write-host -ForegroundColor Red  -Message "Found $($ADUser)in AD"
-                    Write-Log -Message "$($User) not found in AD" -logfile $logfile -Level "Error"
-                    $NoinADObj = New-Object System.Object
-                    $NoinADObj  | Add-Member -type NoteProperty -name Recipient -Value $User
-                    $NoinAD  += $NoinADObj 
-                    $NoinADCounter++
-                    }
-                # USer found so we will continue with processing
-                Else
-                    {
-                        Write-Log -Message "Found $($ADUser.samaccountname)in AD" -logfile $logfile  
-                        #If($ADUser.DistinguishedName -like "*OU=Quest Collaboration Services Objects,OU=QCS*")
-                        # Check if the AD User is in the QCS OU, has a 19 character samaccountname and also has a blank UPN
-                        If ($ADUser.DistinguishedName -like "*OU=Quest Collaboration Services Objects,OU=QCS*" -and $ADUser.DistinguishedName.samaccountname -match "\w{19}" -and ([STRING]::IsNullOrWhitespace($ADUser.UserPrincipalName)))
-                            {
-                            #write-host -ForegroundColor Green "Users is okay"
-                            Write-Log -Message "$($ADUser.Samaccountname) is in the QCS OU" -logfile $logfile 
-                            # Get the mailbox objects attributes including email addresses
-                            $MB = get-mailbox  $user | Select @{L="NewEmailAddresses";E={$_.EmailAddresses}},*
-                            $JoinEmailAddresses = $MB.EmailAddresses -join ","
-                            #write-host "Emailaddresses are $($JoinEmailAddresses)"
-                            # Check if the Mailbox is on the QCS Exhange Database
-                                If($MB.Database -like "*QCS*")
-                                    {
-                                    #write-host -ForegroundColor Green "Database is $($MB.Database)"
-                                    # First put all the attributes found in an array in case we need to backout
-                                    Write-Log -Message "$($MB.PrimarySmtpAddress.Address) Database is $($MB.Database)" -logfile $logfile 
-                                    $QCSMailboxUserObj = New-Object System.Object
-                                    $QCSMailboxUserObj | Add-Member -type NoteProperty -name samaccountname -Value $ADUser.samaccountname
-                                    $QCSMailboxUserObj | Add-Member -type NoteProperty -name DN -Value $ADUser.DistinguishedName
-                                    $QCSMailboxUserObj | Add-Member -type NoteProperty -name Database -Value $MB.Database
-                                    $QCSMailboxUserObj  | Add-Member -type NoteProperty -name PrimaryEmailAddress -Value $CheckMailUser.PrimarySmtpAddress.Address
-                                    $QCSMailboxUserObj  | Add-Member -type NoteProperty -name Alias -Value $MB.Alias
-                                    $QCSMailboxUserObj  | Add-Member -type NoteProperty -name Targetaddress -Value $ADUser.targetAddress 
-                                    $QCSMailboxUserObj  | Add-Member -type NoteProperty -name EmailAddresses -Value $JoinEmailAddresses 
-                                    $QCSMailboxUserObj  | Add-Member -type NoteProperty -name LegacyDN -Value $ADUser.LegacyExchangeDN
-                                    $QCSMailboxUserObj | Add-Member -type NoteProperty -name ExchangeGUID -Value $MB.ExchangeGuid
-                                    $QCSMailboxUser  += $QCSMailboxUserObj
-                                    $QCSMailboxUserCounter++
-                                    $MB.PrimarySmtpAddress.Address
-                                    Write-Log -Message "Disabling mailbox$($MB.PrimarySmtpAddress.Address) on $($DC) " -logfile $logfile
-                                    # First thing we need to do is disable the mailbox - so remove it from the AD object so we can convert it to a MEU
-                                    Disable-Mailbox -Identity $MB.PrimarySmtpAddress.Address -DomainController $DC
-                                    # wait 1 sec for this to replicate
-                                    Start-Sleep -seconds 1
-                                    #Then check to see if this has worked
-                                    $checkMB = get-mailbox $MB.PrimarySmtpAddress.Address -ErrorAction silentlycontinue
-                                    # If there is no such mailbox then we process the object further
-                                    If ([STRING]::IsNullOrWhitespace($checkMB))
-                                        {
-                                        Write-Log -Message "Mailbox  $($MB.PrimarySmtpAddress.Address) on $($DC) doesnt exist" -logfile $logfile
-                                        Write-Log -Message "Enabling Mailuser $($adUser.samaccountname) on $($DC) with External Address $($ADUser.targetAddress)" -logfile $logfile
-                                        # First we need to enable the AD Object as an MEU - confirm needs to be removed
-                                        Enable-MailUser -Identity $adUser.samaccountname -ExternalEmailAddress $ADUser.targetAddress -alias $MB.alias -DomainController $DC -confirm
-                                        # wait 1 sec for this to replicate
-                                        Start-sleep -seconds 1
-                                        #Then check to see if this has worked
-                                        $CheckMailUser = Get-mailuser -Identity $adUser.samaccountname
-                                             # It hasnt so we need to take note of that and save the details for later use
-                                             If ([STRING]::IsNullOrWhitespace($CheckMailUser))
-                                                {
-                                                write-host -ForegroundColor red "Error finding mailuser $($adUser.samaccountname)"
-                                                Write-Log -Message "Cannot find MEU $($ADUser.Samaccountname)" -logfile $logfile -Level "Error"
-                                                $ErrorMEUObj = New-Object System.Object
-                                                $ErrorMEUObj | Add-Member -type NoteProperty -name samaccountname -Value $ADUser.samaccountname
-                                                $ErrorMEUObj | Add-Member -type NoteProperty -name DN -Value $ADUser.DistinguishedName
-                                                $ErrorMEUObj | Add-Member -type NoteProperty -name Database -Value $MB.Database
-                                                $ErrorMEUObj  | Add-Member -type NoteProperty -name Alias -Value $MB.Alias
-                                                $ErrorMEUObj  | Add-Member -type NoteProperty -name PrimaryEmailAddress -Value $MB.PrimarySmtpAddress.Address
-                                                $ErrorMEUObj  | Add-Member -type NoteProperty -name Targetaddress -Value $ADUser.targetAddress 
-                                                $ErrorMEUObj  | Add-Member -type NoteProperty -name EmailAddresses -Value $JoinEmailAddresses 
-                                                $ErrorMEUObj  | Add-Member -type NoteProperty -name LegacyDN -Value $ADUser.LegacyExchangeDN
-                                                $ErrorMEUObj | Add-Member -type NoteProperty -name ExchangeGUID -Value $MB.ExchangeGuid
-                                                $ErrorMEU += $ErrorMEUObj
-                                                $ErrorMEUCounter++
-                                                }
-                                            # MEU found so we will not continue processing
-                                            Else
-                                                {
-                                                Write-Log -Message "Found MEU $($ADUser.Samaccountname)" -logfile $logfile 
-                                                Write-Log -Message "Setting Mailuser $($adUser.samaccountname) on $($DC) with External Address $($ADUser.targetAddress)" -logfile $logfile
-                                                # We will now add the rest of the Mail attributes to the object
-                                                Set-MailUser -Identity $adUser.samaccountname -EmailAddressPolicyEnabled $false -ExternalEmailAddress $ADUser.targetAddress  -EmailAddresses $MB.EMAILADDRESSES -ExchangeGuid $MB.ExchangeGuid -DomainController $DC -WindowsEmailAddress $MB.PrimarySmtpAddress.Address -erroraction silentlycontinue
-                                                # wait 1 sec for this to replicate
-                                                Start-sleep -seconds 1
-                                                #Then check to see if this has worked via looking up against the ExchangeGUID
-                                                $CheckMailUser2 = Get-mailuser -Identity $adUser.samaccountname | ? {$_.ExchangeGuid -eq $MB.ExchangeGuid}
-                                                # MEU with that GUID cant be found - so we will report on this
-                                                If ([STRING]::IsNullOrWhitespace($CheckMailUser2))
-                                                    {
-                                                    write-host -ForegroundColor red "Error finding mailuser $($adUser.samaccountname) with ExchangeGUID $($MB.ExchangeGuid)"
-                                                    Write-Log -Message "Error finding mailuser $($adUser.samaccountname) with ExchangeGUID $($MB.ExchangeGuid)" -logfile $logfile -Level "Error"
-                                                    $ErrorMEUObj = New-Object System.Object
-                                                    $ErrorMEUObj | Add-Member -type NoteProperty -name samaccountname -Value $ADUser.samaccountname
-                                                    $ErrorMEUObj | Add-Member -type NoteProperty -name DN -Value $ADUser.DistinguishedName
-                                                    $ErrorMEUObj | Add-Member -type NoteProperty -name Database -Value $MB.Database
-                                                    $ErrorMEUObj  | Add-Member -type NoteProperty -name PrimaryEmailAddress -Value $CheckMailUser.PrimarySmtpAddress.Address
-                                                    $ErrorMEUObj   | Add-Member -type NoteProperty -name Alias -Value $MB.Alias
-                                                    $ErrorMEUObj  | Add-Member -type NoteProperty -name Targetaddress -Value $ADUser.targetAddress 
-                                                    $ErrorMEUObj  | Add-Member -type NoteProperty -name EmailAddresses -Value $JoinEmailAddresses
-                                                    $ErrorMEUObj  | Add-Member -type NoteProperty -name LegacyDN -Value $ADUser.LegacyExchangeDN
-                                                    $ErrorMEUObj | Add-Member -type NoteProperty -name ExchangeGUID -Value $MB.ExchangeGuid
-                                                    $ErrorMEU += $ErrorMEUObj
-                                                    }
-                                                #MEU found with the same GUID so we will progress to the last stage
-                                                Else
-                                                    {
-                                                    Write-Log -Message "Found mailuser $($adUser.samaccountname) with ExchangeGUID $($MB.ExchangeGuid)" -logfile $logfile 
-                                                    Write-Log -Message "Setting AD User $($adUser.samaccountname) on $($DC) with legacyDN $($ADUser.legacyExchangeDN)" -logfile $logfile -erroraction silentlycontinue
-                                                    # Change the legacyDN to the same value as the Mailbox had to stop there being NDRs when users email via Outlook
-                                                    Set-ADUser $adUser.samaccountname -Replace @{legacyExchangeDN=$ADUser.legacyExchangeDN} -server $DC 
-                                                    Start-sleep -seconds 1
-                                                    #Then check to see if this has worked via looking up against the LegacyDN
-                                                    $CheckLegacyDN = get-aduser $adUser.samaccountname -Properties * | ? {$_.legacyExchangeDN -eq $ADUser.legacyExchangeDN}
-                                                    # We cant find a user with that legacyDn so take note of this
-                                                    If ([STRING]::IsNullOrWhitespace($CheckLegacyDN))  
-                                                        {
-                                                        write-host -ForegroundColor red "Error finding AD User $($adUser.samaccountname) with legacyExchangeDN $($ADUser.legacyExchangeDN)"
-                                                        Write-Log -Message "Error finding mailuser $($adUser.samaccountname) with legacyExchangeDN $($ADUser.legacyExchangeDN)" -logfile $logfile -Level "Error"
-                                                        $ErrorMEUObj = New-Object System.Object
-                                                        $ErrorMEUObj | Add-Member -type NoteProperty -name samaccountname -Value $ADUser.samaccountname
-                                                        $ErrorMEUObj | Add-Member -type NoteProperty -name DN -Value $ADUser.DistinguishedName
-                                                        $ErrorMEUObj | Add-Member -type NoteProperty -name Database -Value $MB.Database
-                                                        $ErrorMEUObj  | Add-Member -type NoteProperty -name PrimaryEmailAddress -Value $CheckMailUser.PrimarySmtpAddress.Address
-                                                        $ErrorMEUObj  | Add-Member -type NoteProperty -name Alias -Value $MB.Alias
-                                                        $ErrorMEUObj  | Add-Member -type NoteProperty -name Targetaddress -Value $ADUser.targetAddress 
-                                                        $ErrorMEUObj  | Add-Member -type NoteProperty -name EmailAddresses -Value $JoinEmailAddresses 
-                                                        $ErrorMEUObj  | Add-Member -type NoteProperty -name LegacyDN -Value $ADUser.LegacyExchangeDN
-                                                        $ErrorMEUObj | Add-Member -type NoteProperty -name ExchangeGUID -Value $MB.ExchangeGuid
-                                                        $ErrorMEU += $ErrorMEUObj
-                                                        }
-                                                    #User found with that legacyDN so report on success
-                                                    Else
-                                                        {
-                                                        Write-Log -Message "Found mailuser $($adUser.samaccountname) with legacyExchangeDN $($ADUser.legacyExchangeDN)" -logfile $logfile
-                                                        #Report this is finished
-                                                        Write-Log -Message "Finished Processing $($adUser.samaccountname) on $($DC)" -logfile $logfile
-                                                        $MailUserobj = New-Object System.Object
-                                                        $MailUserobj | Add-Member -type NoteProperty -name samaccountname -Value $ADUser.samaccountname
-                                                        $MailUserobj | Add-Member -type NoteProperty -name DN -Value $ADUser.DistinguishedName
-                                                        $MailUserobj | Add-Member -type NoteProperty -name Database -Value $MB.Database
-                                                        $MailUserobj  | Add-Member -type NoteProperty -name PrimaryEmailAddress -Value $CheckMailUser.PrimarySmtpAddress.Address
-                                                        $MailUserobj  | Add-Member -type NoteProperty -name Alias -Value $MB.Alias
-                                                        $MailUserobj  | Add-Member -type NoteProperty -name Targetaddress -Value $ADUser.targetAddress 
-                                                        $MailUserobj | Add-Member -type NoteProperty -name EmailAddresses -Value $JoinEmailAddresses 
-                                                        $MailUserobj  | Add-Member -type NoteProperty -name LegacyDN -Value $ADUser.LegacyExchangeDN
-                                                        $MailUserobj | Add-Member -type NoteProperty -name ExchangeGUID -Value $MB.ExchangeGuid
-                                                        $MailUser += $MailUserobj
-                                                        $MailUserCounter++
-                                                        }
-                                                    }
-                                                }
+        $ADUser = Get-ADUser -Filter 'mail -eq $user' -properties * 
+        # We cant find AD object with that email address
+        If ([STRING]::IsNullOrWhitespace($ADUser)) {
+            #write-host -ForegroundColor Red  -Message "Found $($ADUser)in AD"
+            Write-Log -Message "$($User) not found in AD" -logfile $logfile -Level "Error"
+            $NoinADObj = New-Object System.Object
+            $NoinADObj  | Add-Member -type NoteProperty -name Recipient -Value $User
+            $NoinAD += $NoinADObj 
+            $NoinADCounter++
+        }
+        # USer found so we will continue with processing
+        Else {
+            Write-Log -Message "Found $($ADUser.samaccountname)in AD" -logfile $logfile  
+            #If($ADUser.DistinguishedName -like "*OU=Quest Collaboration Services Objects,OU=QCS*")
+            # Check if the AD User is in the QCS OU, has a 19 character samaccountname and also has a blank UPN
+            If ($ADUser.DistinguishedName -like "*OU=Quest Collaboration Services Objects,OU=QCS*" -and $ADUser.DistinguishedName.samaccountname -match "\w{19}" -and ([STRING]::IsNullOrWhitespace($ADUser.UserPrincipalName))) {
+                #write-host -ForegroundColor Green "Users is okay"
+                Write-Log -Message "$($ADUser.Samaccountname) is in the QCS OU" -logfile $logfile 
+                # Get the mailbox objects attributes including email addresses
+                $MB = get-mailbox  $user | Select-Object @{L = "NewEmailAddresses"; E = { $_.EmailAddresses } }, *
+                $JoinEmailAddresses = $MB.EmailAddresses -join ","
+                #write-host "Emailaddresses are $($JoinEmailAddresses)"
+                # Check if the Mailbox is on the QCS Exhange Database
+                If ($MB.Database -like "*QCS*") {
+                    #write-host -ForegroundColor Green "Database is $($MB.Database)"
+                    # First put all the attributes found in an array in case we need to backout
+                    Write-Log -Message "$($MB.PrimarySmtpAddress.Address) Database is $($MB.Database)" -logfile $logfile 
+                    $QCSMailboxUserObj = New-Object System.Object
+                    $QCSMailboxUserObj | Add-Member -type NoteProperty -name samaccountname -Value $ADUser.samaccountname
+                    $QCSMailboxUserObj | Add-Member -type NoteProperty -name DN -Value $ADUser.DistinguishedName
+                    $QCSMailboxUserObj | Add-Member -type NoteProperty -name Database -Value $MB.Database
+                    $QCSMailboxUserObj  | Add-Member -type NoteProperty -name PrimaryEmailAddress -Value $CheckMailUser.PrimarySmtpAddress.Address
+                    $QCSMailboxUserObj  | Add-Member -type NoteProperty -name Alias -Value $MB.Alias
+                    $QCSMailboxUserObj  | Add-Member -type NoteProperty -name Targetaddress -Value $ADUser.targetAddress 
+                    $QCSMailboxUserObj  | Add-Member -type NoteProperty -name EmailAddresses -Value $JoinEmailAddresses 
+                    $QCSMailboxUserObj  | Add-Member -type NoteProperty -name LegacyDN -Value $ADUser.LegacyExchangeDN
+                    $QCSMailboxUserObj | Add-Member -type NoteProperty -name ExchangeGUID -Value $MB.ExchangeGuid
+                    $QCSMailboxUser += $QCSMailboxUserObj
+                    $QCSMailboxUserCounter++
+                    $MB.PrimarySmtpAddress.Address
+                    Write-Log -Message "Disabling mailbox$($MB.PrimarySmtpAddress.Address) on $($DC) " -logfile $logfile
+                    # First thing we need to do is disable the mailbox - so remove it from the AD object so we can convert it to a MEU
+                    Disable-Mailbox -Identity $MB.PrimarySmtpAddress.Address -DomainController $DC
+                    # wait 1 sec for this to replicate
+                    Start-Sleep -seconds 1
+                    #Then check to see if this has worked
+                    $checkMB = get-mailbox $MB.PrimarySmtpAddress.Address -ErrorAction silentlycontinue
+                    # If there is no such mailbox then we process the object further
+                    If ([STRING]::IsNullOrWhitespace($checkMB)) {
+                        Write-Log -Message "Mailbox  $($MB.PrimarySmtpAddress.Address) on $($DC) doesnt exist" -logfile $logfile
+                        Write-Log -Message "Enabling Mailuser $($adUser.samaccountname) on $($DC) with External Address $($ADUser.targetAddress)" -logfile $logfile
+                        # First we need to enable the AD Object as an MEU - confirm needs to be removed
+                        Enable-MailUser -Identity $adUser.samaccountname -ExternalEmailAddress $ADUser.targetAddress -alias $MB.alias -DomainController $DC -confirm
+                        # wait 1 sec for this to replicate
+                        Start-sleep -seconds 1
+                        #Then check to see if this has worked
+                        $CheckMailUser = Get-mailuser -Identity $adUser.samaccountname
+                        # It hasnt so we need to take note of that and save the details for later use
+                        If ([STRING]::IsNullOrWhitespace($CheckMailUser)) {
+                            write-host -ForegroundColor red "Error finding mailuser $($adUser.samaccountname)"
+                            Write-Log -Message "Cannot find MEU $($ADUser.Samaccountname)" -logfile $logfile -Level "Error"
+                            $ErrorMEUObj = New-Object System.Object
+                            $ErrorMEUObj | Add-Member -type NoteProperty -name samaccountname -Value $ADUser.samaccountname
+                            $ErrorMEUObj | Add-Member -type NoteProperty -name DN -Value $ADUser.DistinguishedName
+                            $ErrorMEUObj | Add-Member -type NoteProperty -name Database -Value $MB.Database
+                            $ErrorMEUObj  | Add-Member -type NoteProperty -name Alias -Value $MB.Alias
+                            $ErrorMEUObj  | Add-Member -type NoteProperty -name PrimaryEmailAddress -Value $MB.PrimarySmtpAddress.Address
+                            $ErrorMEUObj  | Add-Member -type NoteProperty -name Targetaddress -Value $ADUser.targetAddress 
+                            $ErrorMEUObj  | Add-Member -type NoteProperty -name EmailAddresses -Value $JoinEmailAddresses 
+                            $ErrorMEUObj  | Add-Member -type NoteProperty -name LegacyDN -Value $ADUser.LegacyExchangeDN
+                            $ErrorMEUObj | Add-Member -type NoteProperty -name ExchangeGUID -Value $MB.ExchangeGuid
+                            $ErrorMEU += $ErrorMEUObj
+                            $ErrorMEUCounter++
+                        }
+                        # MEU found so we will not continue processing
+                        Else {
+                            Write-Log -Message "Found MEU $($ADUser.Samaccountname)" -logfile $logfile 
+                            Write-Log -Message "Setting Mailuser $($adUser.samaccountname) on $($DC) with External Address $($ADUser.targetAddress)" -logfile $logfile
+                            # We will now add the rest of the Mail attributes to the object
+                            Set-MailUser -Identity $adUser.samaccountname -EmailAddressPolicyEnabled $false -ExternalEmailAddress $ADUser.targetAddress  -EmailAddresses $MB.EMAILADDRESSES -ExchangeGuid $MB.ExchangeGuid -DomainController $DC -WindowsEmailAddress $MB.PrimarySmtpAddress.Address -erroraction silentlycontinue
+                            # wait 1 sec for this to replicate
+                            Start-sleep -seconds 1
+                            #Then check to see if this has worked via looking up against the ExchangeGUID
+                            $CheckMailUser2 = Get-mailuser -Identity $adUser.samaccountname | Where-Object { $_.ExchangeGuid -eq $MB.ExchangeGuid }
+                            # MEU with that GUID cant be found - so we will report on this
+                            If ([STRING]::IsNullOrWhitespace($CheckMailUser2)) {
+                                write-host -ForegroundColor red "Error finding mailuser $($adUser.samaccountname) with ExchangeGUID $($MB.ExchangeGuid)"
+                                Write-Log -Message "Error finding mailuser $($adUser.samaccountname) with ExchangeGUID $($MB.ExchangeGuid)" -logfile $logfile -Level "Error"
+                                $ErrorMEUObj = New-Object System.Object
+                                $ErrorMEUObj | Add-Member -type NoteProperty -name samaccountname -Value $ADUser.samaccountname
+                                $ErrorMEUObj | Add-Member -type NoteProperty -name DN -Value $ADUser.DistinguishedName
+                                $ErrorMEUObj | Add-Member -type NoteProperty -name Database -Value $MB.Database
+                                $ErrorMEUObj  | Add-Member -type NoteProperty -name PrimaryEmailAddress -Value $CheckMailUser.PrimarySmtpAddress.Address
+                                $ErrorMEUObj   | Add-Member -type NoteProperty -name Alias -Value $MB.Alias
+                                $ErrorMEUObj  | Add-Member -type NoteProperty -name Targetaddress -Value $ADUser.targetAddress 
+                                $ErrorMEUObj  | Add-Member -type NoteProperty -name EmailAddresses -Value $JoinEmailAddresses
+                                $ErrorMEUObj  | Add-Member -type NoteProperty -name LegacyDN -Value $ADUser.LegacyExchangeDN
+                                $ErrorMEUObj | Add-Member -type NoteProperty -name ExchangeGUID -Value $MB.ExchangeGuid
+                                $ErrorMEU += $ErrorMEUObj
+                            }
+                            #MEU found with the same GUID so we will progress to the last stage
+                            Else {
+                                Write-Log -Message "Found mailuser $($adUser.samaccountname) with ExchangeGUID $($MB.ExchangeGuid)" -logfile $logfile 
+                                Write-Log -Message "Setting AD User $($adUser.samaccountname) on $($DC) with legacyDN $($ADUser.legacyExchangeDN)" -logfile $logfile -erroraction silentlycontinue
+                                # Change the legacyDN to the same value as the Mailbox had to stop there being NDRs when users email via Outlook
+                                Set-ADUser $adUser.samaccountname -Replace @{legacyExchangeDN = $ADUser.legacyExchangeDN } -server $DC 
+                                Start-sleep -seconds 1
+                                #Then check to see if this has worked via looking up against the LegacyDN
+                                $CheckLegacyDN = get-aduser $adUser.samaccountname -Properties * | Where-Object { $_.legacyExchangeDN -eq $ADUser.legacyExchangeDN }
+                                # We cant find a user with that legacyDn so take note of this
+                                If ([STRING]::IsNullOrWhitespace($CheckLegacyDN)) {
+                                    write-host -ForegroundColor red "Error finding AD User $($adUser.samaccountname) with legacyExchangeDN $($ADUser.legacyExchangeDN)"
+                                    Write-Log -Message "Error finding mailuser $($adUser.samaccountname) with legacyExchangeDN $($ADUser.legacyExchangeDN)" -logfile $logfile -Level "Error"
+                                    $ErrorMEUObj = New-Object System.Object
+                                    $ErrorMEUObj | Add-Member -type NoteProperty -name samaccountname -Value $ADUser.samaccountname
+                                    $ErrorMEUObj | Add-Member -type NoteProperty -name DN -Value $ADUser.DistinguishedName
+                                    $ErrorMEUObj | Add-Member -type NoteProperty -name Database -Value $MB.Database
+                                    $ErrorMEUObj  | Add-Member -type NoteProperty -name PrimaryEmailAddress -Value $CheckMailUser.PrimarySmtpAddress.Address
+                                    $ErrorMEUObj  | Add-Member -type NoteProperty -name Alias -Value $MB.Alias
+                                    $ErrorMEUObj  | Add-Member -type NoteProperty -name Targetaddress -Value $ADUser.targetAddress 
+                                    $ErrorMEUObj  | Add-Member -type NoteProperty -name EmailAddresses -Value $JoinEmailAddresses 
+                                    $ErrorMEUObj  | Add-Member -type NoteProperty -name LegacyDN -Value $ADUser.LegacyExchangeDN
+                                    $ErrorMEUObj | Add-Member -type NoteProperty -name ExchangeGUID -Value $MB.ExchangeGuid
+                                    $ErrorMEU += $ErrorMEUObj
+                                }
+                                #User found with that legacyDN so report on success
+                                Else {
+                                    Write-Log -Message "Found mailuser $($adUser.samaccountname) with legacyExchangeDN $($ADUser.legacyExchangeDN)" -logfile $logfile
+                                    #Report this is finished
+                                    Write-Log -Message "Finished Processing $($adUser.samaccountname) on $($DC)" -logfile $logfile
+                                    $MailUserobj = New-Object System.Object
+                                    $MailUserobj | Add-Member -type NoteProperty -name samaccountname -Value $ADUser.samaccountname
+                                    $MailUserobj | Add-Member -type NoteProperty -name DN -Value $ADUser.DistinguishedName
+                                    $MailUserobj | Add-Member -type NoteProperty -name Database -Value $MB.Database
+                                    $MailUserobj  | Add-Member -type NoteProperty -name PrimaryEmailAddress -Value $CheckMailUser.PrimarySmtpAddress.Address
+                                    $MailUserobj  | Add-Member -type NoteProperty -name Alias -Value $MB.Alias
+                                    $MailUserobj  | Add-Member -type NoteProperty -name Targetaddress -Value $ADUser.targetAddress 
+                                    $MailUserobj | Add-Member -type NoteProperty -name EmailAddresses -Value $JoinEmailAddresses 
+                                    $MailUserobj  | Add-Member -type NoteProperty -name LegacyDN -Value $ADUser.LegacyExchangeDN
+                                    $MailUserobj | Add-Member -type NoteProperty -name ExchangeGUID -Value $MB.ExchangeGuid
+                                    $MailUser += $MailUserobj
+                                    $MailUserCounter++
+                                }
+                            }
+                        }
 
 
  
-                                            }
-                                    # The mailbox still exists so we cannot proceedd further so report on this and move on to the next user
-                                    Else
-                                        {
-                                        #write-host -ForegroundColor red "Mailbox  $($MB.PrimarySmtpAddress.Address) on $($DC) exists so cant process user $($adUser.samaccountname)"
-                                        Write-Log -Message "Mailbox  $($MB.PrimarySmtpAddress.Address) on $($DC) exists so cant process user $($adUser.samaccountname)" -logfile $logfile -Level "Error"
-                                        $MBNotDeleteObj = New-Object System.Object
-                                        $MBNotDeleteObj  | Add-Member -type NoteProperty -name samaccountname -Value $ADUser.samaccountname
-                                        $MBNotDeleteObj  | Add-Member -type NoteProperty -name MB-Value $MB.PrimarySmtpAddress.Address
-                                        $MBNotDeleteObj  | Add-Member -type NoteProperty -name Database -Value $MB.Database
-                                        $MBNotDelete   += $MBNotDeleteObj 
-                                        $MBNotDeleteCounter++
-                                        }
+                    }
+                    # The mailbox still exists so we cannot proceedd further so report on this and move on to the next user
+                    Else {
+                        #write-host -ForegroundColor red "Mailbox  $($MB.PrimarySmtpAddress.Address) on $($DC) exists so cant process user $($adUser.samaccountname)"
+                        Write-Log -Message "Mailbox  $($MB.PrimarySmtpAddress.Address) on $($DC) exists so cant process user $($adUser.samaccountname)" -logfile $logfile -Level "Error"
+                        $MBNotDeleteObj = New-Object System.Object
+                        $MBNotDeleteObj  | Add-Member -type NoteProperty -name samaccountname -Value $ADUser.samaccountname
+                        $MBNotDeleteObj  | Add-Member -type NoteProperty -name MB-Value $MB.PrimarySmtpAddress.Address
+                        $MBNotDeleteObj  | Add-Member -type NoteProperty -name Database -Value $MB.Database
+                        $MBNotDelete += $MBNotDeleteObj 
+                        $MBNotDeleteCounter++
+                    }
 
 
-                                    }
-                                # Mailbox is not on QCS database so make note an move on to the next user
-                                Else
-                                    {
-                                    #write-host -ForegroundColor red "Not a QCS Mailbox as Database is $($MB.Database)"
-                                    Write-Log -Message "$($MB.PrimarySmtpAddress.Address) Database is not in the QCS database $($MB.Database)" -logfile $logfile -Level "Error"
-                                    $NotQCSMailboxObj = New-Object System.Object
-                                    $NotQCSMailboxObj | Add-Member -type NoteProperty -name samaccountname -Value $ADUser.samaccountname
-                                    $NotQCSMailboxObj | Add-Member -type NoteProperty -name DN -Value $ADUser.DistinguishedName
-                                    $NotQCSMailboxObj | Add-Member -type NoteProperty -name Database -Value $MB.Database
-                                    $NotQCSMailbox  += $NotQCSMailboxObj
-                                    $NotQCSMailboxCounter++
-                                    }
+                }
+                # Mailbox is not on QCS database so make note an move on to the next user
+                Else {
+                    #write-host -ForegroundColor red "Not a QCS Mailbox as Database is $($MB.Database)"
+                    Write-Log -Message "$($MB.PrimarySmtpAddress.Address) Database is not in the QCS database $($MB.Database)" -logfile $logfile -Level "Error"
+                    $NotQCSMailboxObj = New-Object System.Object
+                    $NotQCSMailboxObj | Add-Member -type NoteProperty -name samaccountname -Value $ADUser.samaccountname
+                    $NotQCSMailboxObj | Add-Member -type NoteProperty -name DN -Value $ADUser.DistinguishedName
+                    $NotQCSMailboxObj | Add-Member -type NoteProperty -name Database -Value $MB.Database
+                    $NotQCSMailbox += $NotQCSMailboxObj
+                    $NotQCSMailboxCounter++
+                }
 
-                            }
-                        # User object is either bit in the QCS OU, doesnt have a samaccountname that matches exactly 19 characters or it doesnt have a blank UPN
-                        Else
-                            {
-                            #write-host -ForegroundColor red "User is not a QCS stub object"
-                            Write-Log -Message "$($ADUser.Samaccountname) is not in the QCS OU  - $($Aduser.CanonicalName)" -logfile $logfile -Level "Error"
-                            $NotQCSUserObj = New-Object System.Object
-                            $NotQCSUserObj | Add-Member -type NoteProperty -name User -Value $ADUser.samaccountname
-                            $NotQCSUserObj | Add-Member -type NoteProperty -name DN -Value $ADUser.DistinguishedName
-                            $NotQCSUserObj | Add-Member -type NoteProperty -name UPN -Value $ADUser.UserPrincipalName
-                            $NotQCSUser += $NotQCSUserObj
-                            $NotQCSUserCounter++
-                            }
-        }
+            }
+            # User object is either bit in the QCS OU, doesnt have a samaccountname that matches exactly 19 characters or it doesnt have a blank UPN
+            Else {
+                #write-host -ForegroundColor red "User is not a QCS stub object"
+                Write-Log -Message "$($ADUser.Samaccountname) is not in the QCS OU  - $($Aduser.CanonicalName)" -logfile $logfile -Level "Error"
+                $NotQCSUserObj = New-Object System.Object
+                $NotQCSUserObj | Add-Member -type NoteProperty -name User -Value $ADUser.samaccountname
+                $NotQCSUserObj | Add-Member -type NoteProperty -name DN -Value $ADUser.DistinguishedName
+                $NotQCSUserObj | Add-Member -type NoteProperty -name UPN -Value $ADUser.UserPrincipalName
+                $NotQCSUser += $NotQCSUserObj
+                $NotQCSUserCounter++
+            }
         }
     }
+}
 
 # Write a summary of what happened during the run to file and screen
 Write-Log -Message "$($USerProcessedCounter) users processed)" -logfile $logfile 
