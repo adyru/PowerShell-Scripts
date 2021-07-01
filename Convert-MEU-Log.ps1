@@ -4,6 +4,7 @@ into MEU
 #>
 
 
+
 # First of we will say that this script will not run without .....
 #Requires -Modules ActiveDirectory
 #requires -Modules sqlserver
@@ -220,7 +221,7 @@ Function Nettestserver {
 ######################
 
 # Static DC to use - needs to be FQDN this will be checked later on
-$DC = "BDCADOMR11.blue01.Babcockgroup.co.uk"
+$DC = "DC.somewhere.co.uk"
 
 #Arrays
 $NotQCSUser = @()
@@ -260,8 +261,8 @@ $NoRecipientOut = "$OutputFolder\No-recipient-$($date).csv"
 $logfile = "$OutputFolder\Convert-MEU-Log-$($date).txt"
 
 #SQL
-$SQLServer = "bdcasqlr241ARS.blue01.babcockgroup.co.uk"
-$Database = "AzureGuestReports"
+$SQLServer = "sql.somewhere.co.uk"
+$Database = "database"
 $table = "QCSMigration"
 
 #Counters to see where we are
@@ -285,7 +286,7 @@ $UsersFile = "users.txt"
 $sw = [diagnostics.stopwatch]::StartNew()
 
 #Email to remove
-$EMailDomain = "*@blue01.babcockgroup.co.uk"
+$EMailDomain = "*@somewhere.co.uk"
 
 ###################
 # End of Vaiables #
